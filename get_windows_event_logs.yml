@@ -1,6 +1,6 @@
 ---
 - name: Get Windows Event Logs via PowerShell Script
-  hosts: windows
+  hosts: all
   gather_facts: true
 
   vars:
