@@ -1,0 +1,84 @@
+---
+- name: Parse Vocera Event Logs via PowerShell Script
+  hosts: windows
+  gather_facts: true
+
+  vars:
+    script_dest: "C:\\Scripts\\Export-EventLogs.ps1"
+    log_output_dir: "C:\\Logs"
+
+    # -------------------------------------------------------------------------
+    # SURVEY VARIABLES — define all of the following in the AAP Job Template
+    # survey prior to use.  Do not set defaults here.
+    # -------------------------------------------------------------------------
+    # log_name        (Multiple Choice)  : Security | System | Application
+    # event_id        (Integer)          : e.g. 4624
+    # start_time      (Text)             : ISO 8601 format — YYYY-MM-DD HH:MM  e.g. 2026-03-10 12:00
+    # end_time        (Text)             : ISO 8601 format — YYYY-MM-DD HH:MM  e.g. 2026-03-12 14:00
+    # network_share_path (Text)          : e.g. \\fileserver\shares\vocera_logs
+    # -------------------------------------------------------------------------
+
+  tasks:
+
+    - name: Ensure C:\Scripts directory exists
+      ansible.windows.win_file:
+        path: "C:\\Scripts"
+        state: directory
+
+    - name: Deploy Export-EventLogs.ps1 to target server
+      ansible.windows.win_copy:
+        src: scripts/Export-EventLogs.ps1
+        dest: "{{ script_dest }}"
+
+    - name: Execute event log export script
+      ansible.windows.win_powershell:
+        script: |
+          & "{{ script_dest }}" `
+            -LogName "{{ log_name }}" `
+            -EventID {{ event_id }} `
+            -StartTime "{{ start_time }}" `
+            -EndTime "{{ end_time }}" `
+            -LogFolder "{{ log_output_dir }}"
+      register: script_output
+
+    - name: Show script output
+      ansible.builtin.debug:
+        msg: "{{ script_output.output }}"
+
+    - name: Find generated CSV(s) in log output directory
+      ansible.windows.win_find:
+        paths: "{{ log_output_dir }}"
+        patterns: "*_FilteredEventLogs_*.csv"
+      register: found_csvs
+
+    - name: Warn if no CSV was generated
+      ansible.builtin.debug:
+        msg: "⚠ No matching events found — no CSV was generated on {{ inventory_hostname }}"
+      when: found_csvs.files | length == 0
+
+    - name: Ensure per-host subfolder exists on network share
+      ansible.windows.win_file:
+        path: "{{ network_share_path }}\\{{ inventory_hostname }}"
+        state: directory
+      when:
+        - network_share_path is defined
+        - found_csvs.files | length > 0
+
+    - name: Copy CSV to network share
+      ansible.windows.win_copy:
+        src: "{{ item.path }}"
+        dest: "{{ network_share_path }}\\{{ inventory_hostname }}\\{{ item.filename }}"
+        remote_src: true
+      loop: "{{ found_csvs.files }}"
+      loop_control:
+        label: "{{ item.filename }}"
+      when:
+        - found_csvs.files | length > 0
+        - network_share_path is defined
+
+    - name: Report export success
+      ansible.builtin.debug:
+        msg: "✓ {{ found_csvs.files | length }} file(s) copied to: {{ network_share_path }}\\{{ inventory_hostname }}\\"
+      when:
+        - found_csvs.files | length > 0
+        - network_share_path is defined
