@@ -1,5 +1,5 @@
 ---
-- name: Parse Vocera Event Logs via PowerShell Script
+- name: Get Windows Event Logs via PowerShell Script
   hosts: windows
   gather_facts: true
 
