@@ -2,7 +2,10 @@
 - name: Get Windows Event Logs via PowerShell Script
   hosts: all
   gather_facts: true
-
+  become: yes
+  become_method: runas
+  become_user: 'VA\VHAV06HTMAAP'
+  become_flags: "logon_type=new_credentials"
   vars:
     script_dest: "C:\\Scripts\\Export-EventLogs.ps1"
     log_output_dir: "C:\\Logs"
