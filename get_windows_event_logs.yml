@@ -4,6 +4,7 @@
   gather_facts: true
   become: yes
   become_method: runas
+  ansible_become_password: "{{ ansible_ssh_pass }}" 
  # become_user: 'VA\VHAV06HTMAAP'
   become_flags: "logon_type=new_credentials"
   vars:
