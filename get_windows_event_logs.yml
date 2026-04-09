@@ -61,6 +61,10 @@
       ansible.windows.win_file:
         path: "{{ network_share_path }}\\{{ inventory_hostname }}"
         state: directory
+      vars:
+        ansible_become_password: "{{ ansible_ssh_pass }}"
+        ansible_become: yes
+        ansible_become_method: runas
       when:
         - network_share_path is defined
         - found_csvs.files | length > 0
