@@ -62,7 +62,6 @@
         path: "{{ network_share_path }}\\{{ inventory_hostname }}"
         state: directory
       vars:
-        ansible_become_password: "{{ ansible_password }}"
         ansible_become: yes
         ansible_become_method: runas
       when:
@@ -75,7 +74,6 @@
         dest: "{{ network_share_path }}\\{{ inventory_hostname }}\\{{ item.filename }}"
         remote_src: true
       vars:
-        ansible_become_password: "{{ ansible_password }}"
         ansible_become: yes
         ansible_become_method: runas
       loop: "{{ found_csvs.files }}"
