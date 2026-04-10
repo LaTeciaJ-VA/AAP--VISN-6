@@ -4,12 +4,12 @@
   gather_facts: true
  # become_user: 'VA\VHAV06HTMAAP'
   become_user: "{{ win_share_user }}"
-  ansible_become_password: "{{ win_share_pass }}"
   become: true
   become_flags: "logon_type=new_credentials"
   vars:
     script_dest: "C:\\Scripts\\Export-EventLogs.ps1"
     log_output_dir: "C:\\Logs"
+    ansible_become_password: "{{ win_share_pass }}"
 
     # -------------------------------------------------------------------------
     # SURVEY VARIABLES — define all of the following in the AAP Job Template
