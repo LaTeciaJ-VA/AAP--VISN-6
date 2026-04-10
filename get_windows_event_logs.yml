@@ -2,7 +2,6 @@
 - name: Get Windows Event Logs via PowerShell Script
   hosts: all
   gather_facts: true
-  #become_user: 'VA\VHAV06HTMAAP'
   become_user: "{{ win_share_user }}"
   become: true
   become_flags: "logon_type=new_credentials"
