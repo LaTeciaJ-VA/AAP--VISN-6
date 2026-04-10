@@ -4,7 +4,7 @@
   gather_facts: true
  # become_user: 'VA\VHAV06HTMAAP'
   become_user: "{{ win_share_user }}"
-  become_password: "{{ win_share_pass }}"
+  ansible_become_password: "{{ win_share_pass }}"
   become: true
   become_flags: "logon_type=new_credentials"
   vars:
