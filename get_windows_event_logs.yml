@@ -3,6 +3,7 @@
   hosts: all
   gather_facts: true
  # become_user: 'VA\VHAV06HTMAAP'
+  become: true
   become_flags: "logon_type=new_credentials"
   vars:
     script_dest: "C:\\Scripts\\Export-EventLogs.ps1"
@@ -61,9 +62,6 @@
       ansible.windows.win_file:
         path: "{{ network_share_path }}\\{{ inventory_hostname }}"
         state: directory
-      vars:
-        ansible_become: yes
-        ansible_become_method: runas
       when:
         - network_share_path is defined
         - found_csvs.files | length > 0
@@ -73,9 +71,6 @@
         src: "{{ item.path }}"
         dest: "{{ network_share_path }}\\{{ inventory_hostname }}\\{{ item.filename }}"
         remote_src: true
-      vars:
-        ansible_become: yes
-        ansible_become_method: runas
       loop: "{{ found_csvs.files }}"
       loop_control:
         label: "{{ item.filename }}"
